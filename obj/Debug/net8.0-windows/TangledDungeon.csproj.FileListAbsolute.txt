@@ -1,0 +1,16 @@
+D:\Projects\TangledDungeon\TangledDungeon\bin\Debug\net8.0-windows\TangledDungeon.exe
+D:\Projects\TangledDungeon\TangledDungeon\bin\Debug\net8.0-windows\TangledDungeon.deps.json
+D:\Projects\TangledDungeon\TangledDungeon\bin\Debug\net8.0-windows\TangledDungeon.runtimeconfig.json
+D:\Projects\TangledDungeon\TangledDungeon\bin\Debug\net8.0-windows\TangledDungeon.dll
+D:\Projects\TangledDungeon\TangledDungeon\bin\Debug\net8.0-windows\TangledDungeon.pdb
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\GameView.resources
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.csproj.GenerateResource.cache
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.AssemblyInfoInputs.cache
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.AssemblyInfo.cs
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.csproj.CoreCompileInputs.cache
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.dll
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\refint\TangledDungeon.dll
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.pdb
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\TangledDungeon.genruntimeconfig.cache
+D:\Projects\TangledDungeon\TangledDungeon\obj\Debug\net8.0-windows\ref\TangledDungeon.dll
