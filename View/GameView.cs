@@ -10,33 +10,46 @@ using TangledDungeon.Domain;
 public partial class GameView : Form
 {
     private GameController Controller;
-    private PictureBox PlayerSprite;
+    public readonly PictureBox PlayerSprite;
+    private PictureBox[] landSprites;
 
     private void InitializeComponent()
     {
-        this.SuspendLayout();
-        this.ClientSize = new System.Drawing.Size(1280, 720);
-        this.Name = "GameView";
-        this.KeyPreview = true;
-        this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameView_KeyDown);
-        this.ResumeLayout(false);
+        SuspendLayout();
+        // 
+        // GameView
+        // 
+        ClientSize = new Size(1280, 720);
+        KeyPreview = true;
+        Name = "GameView";
+        KeyDown += GameView_KeyDown;
+        KeyPress += GameView_KeyPress;
+        KeyUp += GameView_KeyUp;
+        ResumeLayout(false);
     }
 
     public GameView(GameController controller)
     {
         Controller = controller;
-        PlayerSprite = new PictureBox();
-        PlayerSprite.Location = new System.Drawing.Point(Controller.GetPlayerLocation().X, Controller.GetPlayerLocation().Y);
 
-        try
+        landSprites = new PictureBox[Controller.GetLands().Length];
+        var lands = Controller.GetLands();
+        for (int i = 0; i < landSprites.Length; i++)
         {
-            PlayerSprite.Image = Image.FromFile("Assets\\adventurer-idle-00.png");
+            landSprites[i] = new PictureBox();
+            landSprites[i].Image = Image.FromFile("Assets\\groundTexture.jpg");
+            landSprites[i].Size = new Size(lands[i].Width, lands[i].Height);
+            landSprites[i].Location = lands[i].Start.ToSystemDrawingPoint();
+
+            Controls.Add(landSprites[i]);
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Ошибка загрузки изображения: " + ex.Message);
-        }
-        
+
+        PlayerSprite = new PictureBox();
+        PlayerSprite.Location = Controller.GetPlayerLocation().ToSystemDrawingPoint();
+
+        PlayerSprite.Image = Image.FromFile("Assets\\adventurer-idle-00.png");
+        PlayerSprite.Size = new System.Drawing.Size(50, 37);
+
         Controls.Add(PlayerSprite);
 
         InitializeComponent();
@@ -44,11 +57,21 @@ public partial class GameView : Form
 
     public void Render(GameModel model)
     {
-        PlayerSprite.Location = Controller.GetPlayerLocation().ToSystemDrawingPoint() ;
+        PlayerSprite.Location = Controller.GetPlayerLocation().ToSystemDrawingPoint();
     }
 
     private void GameView_KeyDown(object sender, KeyEventArgs e)
     {
-        Controller.HandleInput(e.KeyCode);
+        Controller.HandleStartInput(e.KeyCode);
+    }
+
+    private void GameView_KeyUp(object sender, KeyEventArgs e)
+    {
+        Controller.HandleEndInput(e.KeyCode);
+    }
+
+    private void GameView_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        Controller.HandlePressInput(e.KeyChar);
     }
 }

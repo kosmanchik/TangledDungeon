@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 
 namespace TangledDungeon.Domain
@@ -14,72 +15,26 @@ namespace TangledDungeon.Domain
     {
         public readonly Player Player;
         public readonly Level Level;
-        private Dictionary<Keys, Action> ControlDictionary = new Dictionary<Keys, Action>();
-        public static readonly float Gravity = 1.0f;
+        public static readonly int Gravity = 2;
+        public int Width { get; set; }
+        public int Height { get; set; }
         
-
-        public GameModel(Player player)
+        public GameModel(Player player, Level level)
         {
+            Level = level;
             Player = player;
-            ControlDictionary.Add(Keys.D, () => Player.UpdatePosition(Player.Speed));
-            ControlDictionary.Add(Keys.A, () => {
-                if (Player.Position.X - Player.Speed >= 0)
-                    Player.UpdatePosition(-Player.Speed);
-            });
         }
 
-        public void ProcessInput(Keys input) //Обработка инпута
+        internal void Tick()
         {
-            if (ControlDictionary.ContainsKey(input))
-                ControlDictionary[input].Invoke();
-        }
+            if (Player.JumpCondition == JumpingEnum.Jumping)
+                Player.Jump();
+            if (Player.JumpCondition == JumpingEnum.Falling)
+                Player.Falling();
 
-        internal void Update() // Обновление модели через игровой цикл
-        {
-            
-        }
-    }
-
-    public class Player
-    {
-        public readonly int Speed;
-        public Point Position { get; set; }
-        private bool isOnGround = true;
-        private bool isOnJump = false;
-
-        public Player(int speed, Point position)
-        {
-            Speed = speed;
-            Position = position;
-        }
-
-        public void UpdatePosition(int xDistance)
-        {
-            if (!isOnGround && !isOnJump)
-            {
-                Position.Y -= (int)GameModel.Gravity;
-            }
-
-            Position.X += xDistance;
-        }
-    }
-
-    public class Level
-    {
-        private Land[] lands;
-    }
-
-    public class Land
-    {
-        public readonly Point Start;
-        public readonly int Height;
-        public readonly int Width;
-
-        Land(Point start, int height, int width) 
-        {
-            Start = start;
-            Height = height;
-            Width = width;
+            if (Player.MovementCondition == MovementEnum.MovingLeft 
+                || Player.MovementCondition == MovementEnum.MovingRight)
+                Player.Move();
         }
     }
 }
