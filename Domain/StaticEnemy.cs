@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace TangledDungeon.Domain
 {
-    public class Land
+    public class StaticEnemy
     {
-        public readonly Point Start;
-        public readonly int Height;
+        public readonly Point Position;
         public readonly int Width;
-        public static Land EmptyLand = new Land(null, int.MaxValue, int.MaxValue);
+        public readonly int Height;
 
-        public Land(Point start, int width, int height)
+        public StaticEnemy(Point position, int width, int height)
         {
-            Start = start;
+            Position = position;
             Width = width;
             Height = height;
         }

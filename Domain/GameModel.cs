@@ -14,15 +14,22 @@ namespace TangledDungeon.Domain
     public class GameModel
     {
         public readonly Player Player;
-        public readonly Level Level;
-        public static readonly int Gravity = 2;
+        public readonly Level[] Levels;
+        private Point PlayerStartPosition;
+        private Level InitialCurrentLevel;
+        private int CurrentLevelIndex = 0;
+        public static readonly int Gravity = 4;
         public int Width { get; set; }
         public int Height { get; set; }
-        
-        public GameModel(Player player, Level level)
+        public Level currentLevel;
+
+        public GameModel(Player player, Level[] levels)
         {
-            Level = level;
+            Levels = levels;
+            InitialCurrentLevel = new Level(levels[0]);
+            currentLevel = levels[0];
             Player = player;
+            PlayerStartPosition = new Point(player.Position);
         }
 
         internal void Tick()
@@ -35,6 +42,44 @@ namespace TangledDungeon.Domain
             if (Player.MovementCondition == MovementEnum.MovingLeft 
                 || Player.MovementCondition == MovementEnum.MovingRight)
                 Player.Move();
+        }
+
+        public Level ExitLevel()
+        {
+            var exitPoint = currentLevel.GetExitPoint();
+            if (Player.Position.X + Player.Width > exitPoint.X && Player.Position.X < exitPoint.X + 50
+                && Player.Position.Y + Player.Height > exitPoint.Y && Player.Position.Y < exitPoint.Y + 50)
+            {
+                if (CurrentLevelIndex + 1 < Levels.Length)
+                {
+                    currentLevel = Levels[CurrentLevelIndex + 1];
+                    CurrentLevelIndex++;
+                    Player.Level = currentLevel;
+                    InitialCurrentLevel = new Level(currentLevel);
+                    return currentLevel;
+                }
+                else
+                    EndGame();
+            }
+
+            return Level.EmptyLevel;
+        }
+
+        private void EndGame()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Level PushLever()
+        {
+            return currentLevel.PushLever(Player.Position, Player.Width, Player.Height);
+        }
+
+        public void RestartLevel()
+        {
+            Player.Position = new Point(PlayerStartPosition);
+            currentLevel = new Level(InitialCurrentLevel);
+            Player.IsDead = false;
         }
     }
 }

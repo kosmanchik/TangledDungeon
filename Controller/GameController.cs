@@ -14,15 +14,21 @@ public class GameController
     public GameView gameView;
     private Dictionary<Keys, Action> StartMovementDictionary = new Dictionary<Keys, Action>();
     private Dictionary<Keys, Action> EndMovementDictionary = new Dictionary<Keys, Action>();
+    private Dictionary<Keys, Func<Level>> InteractionsDictionary = new Dictionary<Keys, Func<Level>>();
 
     public Point GetPlayerLocation()
     {
         return new Point(Model.Player.Position);
     }
 
+    public Point GetExitLocation()
+    {
+        return new Point(Model.currentLevel.GetExitPoint());
+    }
+
     public Land[] GetLands()
     {
-        return Model.Level.GetLands();
+        return Model.currentLevel.GetLands();
     }
 
     public GameController(GameModel model)
@@ -35,10 +41,26 @@ public class GameController
         EndMovementDictionary.Add(Keys.D, () => Model.Player.MovementCondition = MovementEnum.Staying);
         EndMovementDictionary.Add(Keys.A, () => Model.Player.MovementCondition = MovementEnum.Staying);
 
+        InteractionsDictionary.Add(Keys.E, () => Model.ExitLevel());
+        InteractionsDictionary.Add(Keys.F, () => Model.PushLever());
+
         GameTimer = new System.Windows.Forms.Timer();
         GameTimer.Interval = 16; // ~60 FPS
         GameTimer.Tick += GameLoop;
         GameTimer.Start();
+    }
+    private void GameLoop(object sender, EventArgs e) 
+    {
+        if (Model.Player.IsDead)
+        {
+            GameTimer.Stop();
+            Model.RestartLevel();
+        }
+        else
+        {
+            Model.Tick();
+            gameView.Render(Model);
+        }            
     }
 
     public void HandleJump(char key)
@@ -47,16 +69,14 @@ public class GameController
             Model.Player.JumpCondition = JumpingEnum.Jumping;
     }
 
-    private void GameLoop(object sender, EventArgs e)
-    {
-        Model.Tick();
-        gameView.Render(Model);            
-    }
-
     internal void HandleStartInput(Keys key)
     {
         if (StartMovementDictionary.ContainsKey(key))
             StartMovementDictionary[key].Invoke();
+
+        else if (key == Keys.R && !GameTimer.Enabled)
+            GameTimer.Start();
+            
     }
 
     internal void HandleEndInput(Keys keyCode)
@@ -69,5 +89,13 @@ public class GameController
     {
         if (keyChar == ' ')
             Model.Player.JumpCondition = JumpingEnum.Jumping;
+
+        else if (InteractionsDictionary.ContainsKey((Keys)Char.ToUpper(keyChar)))
+        {
+            var level = InteractionsDictionary[(Keys)Char.ToUpper(keyChar)].Invoke();
+            if (level != Level.EmptyLevel && level != null)
+                gameView.UpdateLevel(level);
+        }         
+
     }
 }

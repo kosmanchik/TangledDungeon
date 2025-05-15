@@ -11,14 +11,14 @@ namespace TangledDungeon.Domain
         public readonly int Speed;
         public readonly int Height;
         public readonly int Width;
-        public readonly int JumpSpeed = 2;
-        private int JumpHeight = 25;
+        public readonly int JumpSpeed = 4;
+        private int JumpHeight = 20;
         private int CurrentJumpHeight = 0;
-        
-        private Level Level;
+        public Level Level;
         public Point Position { get; set; }
         public MovementEnum MovementCondition { get; set; }
         public JumpingEnum JumpCondition { get; set; }
+        public bool IsDead { get; set; }
 
         public Player(int speed, Point position, Level level, int width, int height)
         {
@@ -36,6 +36,7 @@ namespace TangledDungeon.Domain
                 Position.Y -= JumpSpeed;
                 CurrentJumpHeight++;
             }
+            CheckDeath();
 
             if (CurrentJumpHeight == JumpHeight)
                 JumpCondition = JumpingEnum.Falling;
@@ -44,7 +45,9 @@ namespace TangledDungeon.Domain
         public void Falling()
         {
             Position.Y += GameModel.Gravity;
-            if (Level.IsOnLand(Position, 50, 37))
+            CheckDeath();
+
+            if (Level.IsOnLand(Position, Width, Height))
             {
                 JumpCondition = JumpingEnum.Staying;
                 CurrentJumpHeight = 0;
@@ -53,10 +56,21 @@ namespace TangledDungeon.Domain
 
         public void Move()
         {
+            if (!Level.IsOnLand(Position, Width, Height) && JumpCondition != JumpingEnum.Jumping)
+                JumpCondition = JumpingEnum.Falling;
+
             if (MovementCondition == MovementEnum.MovingLeft)
                 Position.X -= Speed;
             else if (MovementCondition == MovementEnum.MovingRight)
                 Position.X += Speed;
+
+            CheckDeath();
+        }
+
+        private void CheckDeath()
+        {
+            if (Level.IsEnemyCollision(Position, Width, Height))
+                IsDead = true;
         }
     }
 }

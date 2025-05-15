@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TangledDungeon
+namespace TangledDungeonInit
 {
-    internal static class Program
+    internal static partial class InitGame
     {
         /// <summary>
         /// Главная точка входа для приложения.
@@ -18,10 +18,9 @@ namespace TangledDungeon
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var level = new Level(new Land[1] {new Land(new Point(0, 200), 1000, 10)});
-            var player = new Player(2, new Point(0, 100), level, 50, 37);
+            var player = new Player(4, new Point(30, 0), levels[0], 20, 29);
 
-            var model = new GameModel(player, level);
+            var model = new GameModel(player, levels);
             var controller = new GameController(model);
             var view = new GameView(controller);
 
