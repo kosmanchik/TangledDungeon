@@ -16,7 +16,6 @@ namespace TangledDungeon.Domain
         public readonly Player Player;
         public readonly Level[] Levels;
         private Point PlayerStartPosition;
-        private Level InitialCurrentLevel;
         private int CurrentLevelIndex = 0;
         public static readonly int Gravity = 4;
         public int Width { get; set; }
@@ -26,7 +25,6 @@ namespace TangledDungeon.Domain
         public GameModel(Player player, Level[] levels)
         {
             Levels = levels;
-            InitialCurrentLevel = new Level(levels[0]);
             currentLevel = levels[0];
             Player = player;
             PlayerStartPosition = new Point(player.Position);
@@ -41,7 +39,13 @@ namespace TangledDungeon.Domain
 
             if (Player.MovementCondition == MovementEnum.MovingLeft 
                 || Player.MovementCondition == MovementEnum.MovingRight)
+            {
                 Player.Move();
+                if (Player.Position.X + Player.Width > Width || Player.Position.X + Player.Width < 0
+                    || Player.Position.Y + Player.Height < 0 || Player.Position.Y - Player.Height > Height)
+                    Player.IsDead = true;
+            }
+                
         }
 
         public Level ExitLevel()
@@ -55,30 +59,20 @@ namespace TangledDungeon.Domain
                     currentLevel = Levels[CurrentLevelIndex + 1];
                     CurrentLevelIndex++;
                     Player.Level = currentLevel;
-                    InitialCurrentLevel = new Level(currentLevel);
                     return currentLevel;
                 }
                 else
-                    EndGame();
+                    Player.Level = Level.EmptyLevel;
             }
 
             return Level.EmptyLevel;
         }
 
-        private void EndGame()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Level PushLever()
-        {
-            return currentLevel.PushLever(Player.Position, Player.Width, Player.Height);
-        }
+        public LandCommand PushLever() => currentLevel.PushLever(Player.Position, Player.Width, Player.Height);
 
         public void RestartLevel()
         {
             Player.Position = new Point(PlayerStartPosition);
-            currentLevel = new Level(InitialCurrentLevel);
             Player.IsDead = false;
         }
     }

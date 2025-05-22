@@ -9,17 +9,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TangledDungeon.Domain;
+using TangledDungeon.View;
 using Label = System.Windows.Forms.Label;
 
 public partial class GameView : Form
 {
     private GameController Controller;
     public PictureBox PlayerSprite;
-    private PictureBox[] LandSprites;
+    private PictureBox[] LandsSprites;
     private PictureBox ExitSprite;
     private PictureBox[] StaticEnemiesSprites;
     private PictureBox[] LeverSprites;
     private SoundPlayer LevelUpdateSound;
+    private SoundPlayer DeathSound;
 
     private void InitializeComponent()
     {
@@ -28,10 +30,13 @@ public partial class GameView : Form
         // GameView
         // 
         BackColor = SystemColors.ControlLight;
-        BackgroundImage = TangledDungeon.Properties.Resources.background;
+        BackgroundImage = Image.FromFile("Assets\\gameBackground.jpg");
         ClientSize = new Size(1280, 720);
+        MaximizeBox = false;
+        MinimizeBox = false;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
         KeyPreview = true;
-        Name = "GameView";
+        Name = "TangledDungeon";
         KeyDown += GameView_KeyDown;
         KeyPress += GameView_KeyPress;
         KeyUp += GameView_KeyUp;
@@ -41,12 +46,14 @@ public partial class GameView : Form
     public GameView(GameController controller)
     {
         Controller = controller;
-
+        Controller.gameView = this;
+        Text = "TangledDungeon";
         InitPlayer();
         InitLevel(controller.Model.currentLevel);
         InitEnemies(controller.Model.currentLevel);
         LevelUpdateSound = new SoundPlayer("Assets\\levelUpdated.wav");
-
+        DeathSound = new SoundPlayer("Assets\\death.wav");
+        Controller.StartGameTimer();
         InitializeComponent();
     }
 
@@ -64,22 +71,21 @@ public partial class GameView : Form
 
     private void InitLevel(Level level)
     {
-        var lands = level.GetLands();
-        LandSprites = new PictureBox[lands.Length];
+        var Lands = (ILand[])level.GetLands();
 
-        for (int i = 0; i < LandSprites.Length; i++)
-        {
-            if (lands[i] == Land.EmptyLand)
-                continue;
+        InitlLands(Lands);
+        InitLevers(level);
 
-            LandSprites[i] = new PictureBox();
-            LandSprites[i].Image = Image.FromFile("Assets\\groundTexture.jpg");
-            LandSprites[i].Size = new Size(lands[i].Width, lands[i].Height);
-            LandSprites[i].Location = lands[i].Start.ToSystemDrawingPoint();
+        ExitSprite = new PictureBox();
+        ExitSprite.Location = Controller.GetExitLocation().ToSystemDrawingPoint();
+        ExitSprite.Image = Image.FromFile("Assets\\exit.png");
+        ExitSprite.BackColor = Color.Transparent;
 
-            Controls.Add(LandSprites[i]);
-        }
+        Controls.Add(ExitSprite);
+    }
 
+    private void InitLevers(Level level)
+    {
         var levers = level.GetLevers();
         LeverSprites = new PictureBox[levers.Length];
         for (int i = 0; i < LeverSprites.Length; i++)
@@ -92,13 +98,24 @@ public partial class GameView : Form
 
             Controls.Add(LeverSprites[i]);
         }
+    }
 
-        ExitSprite = new PictureBox();
-        ExitSprite.Location = Controller.GetExitLocation().ToSystemDrawingPoint();
-        ExitSprite.Image = Image.FromFile("Assets\\exit.png");
-        ExitSprite.BackColor = Color.Transparent;
+    private void InitlLands(ILand[] lands)
+    {
+        LandsSprites = new PictureBox[lands.Length];
 
-        Controls.Add(ExitSprite);
+        for (int i = 0; i < LandsSprites.Length; i++)
+        {
+            if (lands[i] == ILand.EmptyLand)
+                continue;
+
+            LandsSprites[i] = new PictureBox();
+            LandsSprites[i].Image = Image.FromFile("Assets\\groundTexture.jpg");
+            LandsSprites[i].Size = new Size(lands[i].Width, lands[i].Height);
+            LandsSprites[i].Location = lands[i].Start.ToSystemDrawingPoint();
+
+            Controls.Add(LandsSprites[i]);
+        }
     }
 
     private void InitEnemies(Level level)
@@ -119,6 +136,13 @@ public partial class GameView : Form
 
     public void Render(GameModel model)
     {
+        if (model.Player.Level == Level.EmptyLevel)
+        {
+            MainMenu mainMenu = new MainMenu(Controller);
+            this.Hide();
+            mainMenu.Show();
+            Controller.StopGameTimer();
+        }
         PlayerSprite.Location = Controller.GetPlayerLocation().ToSystemDrawingPoint();
     }
 
@@ -147,5 +171,19 @@ public partial class GameView : Form
             InitLevel(level);
             InitEnemies(level);
         }        
+    }
+
+    internal void PlayDeathSound() => DeathSound.Play();
+
+    internal void UpdateLand(LandCommand landCommand)
+    {
+        if (landCommand == LandCommand.EmptyCommand)
+            return;
+
+        if (landCommand.LandStatus == ILand.EmptyLand)
+            Controls.Remove(LandsSprites[landCommand.Index]);
+        else 
+            Controls.Add(LandsSprites[landCommand.Index]);
+        LevelUpdateSound.Play();
     }
 }

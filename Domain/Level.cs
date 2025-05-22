@@ -10,16 +10,14 @@ namespace TangledDungeon.Domain
 {
     public class Level
     {
-        private Land[] Lands;
+        private ILand[] Lands;
         private Exit LevelExit;
         private StaticEnemy[] StaticEnemies;
-        private Lever[] Levers;
+        private ILever[] Levers;
+        public static Level EmptyLevel = new Level([], null, [], []);
 
-
-        public static Level EmptyLevel = new Level(null, null, null, null);
-        private Level currentLevel;
-
-        public Level(Land[] lands, Exit levelExit, StaticEnemy[] staticEnemies, Lever[] levers)
+        public Level(ILand[] lands, Exit levelExit, 
+            StaticEnemy[] staticEnemies, ILever[] levers)
         {
             Lands = lands;
             LevelExit = levelExit;
@@ -35,17 +33,21 @@ namespace TangledDungeon.Domain
             Levers = level.Levers;
         }
 
-        public bool IsOnLand(Point playerPosition, int playerWidth, int playerHeight)
+        public bool IsOnHorizontalLand(Point playerPosition, int playerWidth, int playerHeight)
         {
-            var playerRectangle = new Rectangle(playerPosition.X, playerPosition.Y, playerWidth, playerHeight);
-            foreach (var land in Lands)
-            {
-                if (land == Land.EmptyLand)
-                    continue;
-                var landRectangle = new Rectangle(land.Start.X, land.Start.Y, land.Width, land.Height);
-                if (landRectangle.IntersectsWith(playerRectangle))
+            foreach (var land in Lands.Where(land => land is HorizontalLand))
+                if (land != ILand.EmptyLand 
+                    && land.IsOverlap(playerPosition, playerWidth, playerHeight))
                     return true;
-            }
+            return false;
+        }
+
+        public bool IsOnVerticalLand(Point playerPosition, int playerWidth, int playerHeight)
+        {
+            foreach (var land in Lands.Where(land => land is VerticalLand))
+                if (land != ILand.EmptyLand 
+                    && land.IsOverlap(playerPosition, playerWidth, playerHeight))
+                    return true;
             return false;
         }
 
@@ -65,9 +67,9 @@ namespace TangledDungeon.Domain
             return new Point(LevelExit.Position);
         }
 
-        public Land[] GetLands()
+        public ILand[] GetLands()
         {
-            return (Land[])Lands.Clone();
+            return (ILand[])Lands.Clone();
         }
 
         public StaticEnemy[] GetStaticEnemies()
@@ -75,63 +77,27 @@ namespace TangledDungeon.Domain
             return (StaticEnemy[])StaticEnemies.Clone();
         }
 
-        public Lever[] GetLevers()
+        public ILever[] GetLevers()
         {
-            return (Lever[])Levers.Clone();
+            return (ILever[])Levers.Clone();
         }
 
-        public Level PushLever(Point playerPosition, int playerWidth, int playerHeight)
+        public LandCommand PushLever(Point playerPosition, int playerWidth, int playerHeight)
         {
-            var playerRectangle = new Rectangle(playerPosition.X, playerPosition.Y, playerWidth, playerHeight);
-            var isChanged = false;
+            var playerRectange = new Rectangle(playerPosition.X, playerPosition.Y, playerWidth, playerHeight);
             foreach(var lever in Levers)
             {
                 var leverRectangle = new Rectangle(lever.Position.X, lever.Position.Y, lever.Width, lever.Height);
-                if (leverRectangle.IntersectsWith(playerRectangle))
+                if (leverRectangle.IntersectsWith(playerRectange))
                 {
-                    if (Lands[lever.indexLandToChange] != Land.EmptyLand)
-                    {
-                        lever.savedLand = Lands[lever.indexLandToChange];
-                        Lands[lever.indexLandToChange] = Land.EmptyLand;
-                    }
-                    else
-                    {
-                        Lands[lever.indexLandToChange] = lever.savedLand;
-                        lever.savedLand = Land.EmptyLand;
-                    }
-                    isChanged = true;
+                    var landCommand = lever.ChangeLevel(Lands);
+                    if (landCommand != LandCommand.EmptyCommand)
+                        Lands[landCommand.Index] = landCommand.LandStatus;
+                    return landCommand;
                 }
             }
 
-            return isChanged ? this : EmptyLevel;
-        }
-
-        internal bool IsRightLandCollision(Point position, int width, int height)
-        {
-            var playerRectangle = new Rectangle(position.X, position.Y, width, height);
-            foreach (var land in Lands)
-            {
-                if (land == Land.EmptyLand)
-                    continue;
-
-                if (position.X + width == land.Start.X)
-                    return true;
-            }                
-
-            return false;
-        }
-
-        internal bool IsLeftLandCollision(Point position, int width, int height)
-        {
-            foreach (var land in Lands)
-            {
-                if (land == Land.EmptyLand)
-                    continue;
-                else if (position.X - width == land.Start.X)
-                    return true;
-            }
-
-            return false;
+            return LandCommand.EmptyCommand;
         }
     }
 }

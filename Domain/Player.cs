@@ -47,7 +47,7 @@ namespace TangledDungeon.Domain
             Position.Y += GameModel.Gravity;
             CheckDeath();
 
-            if (Level.IsOnLand(Position, Width, Height))
+            if (Level.IsOnHorizontalLand(Position, Width, Height))
             {
                 JumpCondition = JumpingEnum.Staying;
                 CurrentJumpHeight = 0;
@@ -56,14 +56,25 @@ namespace TangledDungeon.Domain
 
         public void Move()
         {
-            if (!Level.IsOnLand(Position, Width, Height) && JumpCondition != JumpingEnum.Jumping)
+            if (!Level.IsOnHorizontalLand(Position, Width, Height) && JumpCondition != JumpingEnum.Jumping)
                 JumpCondition = JumpingEnum.Falling;
 
-            if (MovementCondition == MovementEnum.MovingLeft)
+            if (MovementCondition == MovementEnum.MovingLeft && !Level.IsOnVerticalLand(Position, Width, Height))
                 Position.X -= Speed;
-            else if (MovementCondition == MovementEnum.MovingRight)
-                Position.X += Speed;
+            else if (Level.IsOnVerticalLand(Position, Width, Height))
+            {
+                Position.X -= 5 * Speed;
+                MovementCondition = MovementEnum.Staying;
+            }
 
+            if (MovementCondition == MovementEnum.MovingRight && !Level.IsOnVerticalLand(Position, Width, Height))
+                Position.X += Speed;
+            else if (Level.IsOnVerticalLand(Position, Width, Height))
+            {
+                Position.X += 5 * Speed;
+                MovementCondition = MovementEnum.Staying;
+            }
+                
             CheckDeath();
         }
 

@@ -26,7 +26,7 @@ public class GameController
         return new Point(Model.currentLevel.GetExitPoint());
     }
 
-    public Land[] GetLands()
+    public ILand[] GetLands()
     {
         return Model.currentLevel.GetLands();
     }
@@ -42,18 +42,23 @@ public class GameController
         EndMovementDictionary.Add(Keys.A, () => Model.Player.MovementCondition = MovementEnum.Staying);
 
         InteractionsDictionary.Add(Keys.E, () => Model.ExitLevel());
-        InteractionsDictionary.Add(Keys.F, () => Model.PushLever());
+    }
 
+    public void StartGameTimer()
+    {
         GameTimer = new System.Windows.Forms.Timer();
-        GameTimer.Interval = 16; // ~60 FPS
+        GameTimer.Interval = 8; // 60 FPS
         GameTimer.Tick += GameLoop;
         GameTimer.Start();
     }
+    public void StopGameTimer() => GameTimer.Stop();
+
     private void GameLoop(object sender, EventArgs e) 
     {
         if (Model.Player.IsDead)
         {
             GameTimer.Stop();
+            gameView.PlayDeathSound();
             Model.RestartLevel();
         }
         else
@@ -63,12 +68,6 @@ public class GameController
         }            
     }
 
-    public void HandleJump(char key)
-    {
-        if (key == ' ')
-            Model.Player.JumpCondition = JumpingEnum.Jumping;
-    }
-
     internal void HandleStartInput(Keys key)
     {
         if (StartMovementDictionary.ContainsKey(key))
@@ -76,7 +75,6 @@ public class GameController
 
         else if (key == Keys.R && !GameTimer.Enabled)
             GameTimer.Start();
-            
     }
 
     internal void HandleEndInput(Keys keyCode)
@@ -95,7 +93,11 @@ public class GameController
             var level = InteractionsDictionary[(Keys)Char.ToUpper(keyChar)].Invoke();
             if (level != Level.EmptyLevel && level != null)
                 gameView.UpdateLevel(level);
-        }         
-
+        }
+        else if ((Keys)Char.ToUpper(keyChar) == Keys.F)
+        {
+            var landCommand = Model.PushLever();
+            gameView.UpdateLand(landCommand);
+        }
     }
 }

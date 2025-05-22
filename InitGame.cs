@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TangledDungeon.View;
 
 namespace TangledDungeonInit
 {
@@ -22,12 +23,10 @@ namespace TangledDungeonInit
 
             var model = new GameModel(player, levels);
             var controller = new GameController(model);
-            var view = new GameView(controller);
+            var view = new MainMenu(controller);
 
-            model.Width = view.ClientSize.Width - view.PlayerSprite.Width;
+            model.Width = view.ClientSize.Width;
             model.Height = view.ClientSize.Height;
-
-            controller.gameView = view;
 
             Application.Run(view);
         }
