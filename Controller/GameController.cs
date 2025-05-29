@@ -40,14 +40,12 @@ public class GameController
 
         EndMovementDictionary.Add(Keys.D, () => Model.Player.MovementCondition = MovementEnum.Staying);
         EndMovementDictionary.Add(Keys.A, () => Model.Player.MovementCondition = MovementEnum.Staying);
-
-        InteractionsDictionary.Add(Keys.E, () => Model.ExitLevel());
     }
 
     public void StartGameTimer()
     {
         GameTimer = new System.Windows.Forms.Timer();
-        GameTimer.Interval = 8; // 60 FPS
+        GameTimer.Interval = 16; // 60 FPS
         GameTimer.Tick += GameLoop;
         GameTimer.Start();
     }
@@ -88,9 +86,9 @@ public class GameController
         if (keyChar == ' ')
             Model.Player.JumpCondition = JumpingEnum.Jumping;
 
-        else if (InteractionsDictionary.ContainsKey((Keys)Char.ToUpper(keyChar)))
+        else if ((Keys)Char.ToUpper(keyChar) == Keys.E)
         {
-            var level = InteractionsDictionary[(Keys)Char.ToUpper(keyChar)].Invoke();
+            var level = Model.ExitLevel();
             if (level != Level.EmptyLevel && level != null)
                 gameView.UpdateLevel(level);
         }

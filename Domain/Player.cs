@@ -78,7 +78,7 @@ namespace TangledDungeon.Domain
             CheckDeath();
         }
 
-        private void CheckDeath()
+        public void CheckDeath()
         {
             if (Level.IsEnemyCollision(Position, Width, Height))
                 IsDead = true;

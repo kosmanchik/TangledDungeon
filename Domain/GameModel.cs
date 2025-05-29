@@ -59,6 +59,7 @@ namespace TangledDungeon.Domain
                     currentLevel = Levels[CurrentLevelIndex + 1];
                     CurrentLevelIndex++;
                     Player.Level = currentLevel;
+                    PlayerStartPosition = new Point(Player.Position);
                     return currentLevel;
                 }
                 else

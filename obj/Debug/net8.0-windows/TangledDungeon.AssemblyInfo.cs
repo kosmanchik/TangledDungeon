@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TangledDungeon")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ad7ef107a07322c7a4001b578730052de4d44df")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+62775c4f48005c845e43f0123a4ebe6d849804aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("TangledDungeon")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TangledDungeon")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
